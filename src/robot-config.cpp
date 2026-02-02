@@ -21,6 +21,7 @@ motor_group RightMotors = motor_group(RightFront, RightBack);
 motor_group LeftMotors = motor_group(LeftFront, LeftBack);
 digital_out ExtendoOutA = digital_out(Brain.ThreeWirePort.A);
 digital_out ExtendoOutB = digital_out(Brain.ThreeWirePort.B);
+digital_out Descorer = digital_out(Brain.ThreeWirePort.H);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable

@@ -38,6 +38,7 @@ bool isRedTeam = true;
 // Pneumatics toggle state
 bool extendoAState = false;
 bool extendoBState = false;
+bool descorerState = false;
 
 void toggleExtendoA() {
   extendoAState = !extendoAState;
@@ -47,6 +48,11 @@ void toggleExtendoA() {
 void toggleExtendoB() {
   extendoBState = !extendoBState;
   ExtendoOutB.set(extendoBState);
+}
+
+void toggleDescorer() {
+  descorerState = !descorerState;
+  Descorer.set(descorerState);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -99,8 +105,10 @@ void usercontrol(void) {
   // Initialize pneumatics default states and register toggle handlers (once)
   ExtendoOutA.set(extendoAState);
   ExtendoOutB.set(extendoBState);
-  Controller1.ButtonX.pressed(toggleExtendoA);
-  Controller1.ButtonY.pressed(toggleExtendoB);
+  Descorer.set(descorerState);
+  Controller1.ButtonY.pressed(toggleExtendoA);
+  Controller1.ButtonX.pressed(toggleExtendoB);
+  Controller1.ButtonA.pressed(toggleDescorer);
 
   while (true) {
   // joystick values

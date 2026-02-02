@@ -27,6 +27,27 @@ const bool invertAuton = true;
 void autonomous(void) {
         //Auton Skills 
     if (selectedAuton == 0) {
+       // picking up 3||4 balls auton (in work) ----------------------------------------------------------------------------------------
+        drive(20, 60);
+        wait(100, msec);
+        turnTo(-30, 30);
+        wait(100, msec);
+        Flexwheel.spin(reverse, 100, percent);
+        intake();
+        drive(11, 20);
+        wait(500, msec);
+        stop();
+        turnTo(-95, 60);
+        drive(-11, 40);
+        Flexwheel.spin(fwd, 100, percent);
+        outtake();
+        wait(5000, msec);
+        stop();
+        Flexwheel.stop();
+        drive(30, 70);
+    }
+        
+
         //one ball auton
         // drive(-32, 70);
         // turnTo(32, 70);
@@ -43,31 +64,8 @@ void autonomous(void) {
         // wait(100, msec);
         // drive(50, 100);
 
-
-        // //picking up 3 balls auton (in work) ----------------------------------------------------------------------------------------
-        //  drive(15, 60);
-        // wait(100, msec);
-        // turnTo(-20, 30);
-        // wait(100, msec);
-        // intake();
-        // drive(15, 40);
-        // wait(2000, msec);
-        // stop();
-        // turnTo(-118, 30);
-        // drive(-12, 40);
-        // Flexwheel.spin(fwd, 100, percent);
-        // outtake();
-        // wait(7000, msec);
-        // stop();
-        // flexwheel.stop();
-        // turnTo(-60, 100);
-        // wait(100, msec);
-        // drive(50, 100);
-
         
         // //parkedstop();
-
-the
         // //one ball auton --------------------------------------------------------------------------------------------------------
         // drive(-30, 60);
         // turnTo(32, 30);
@@ -79,124 +77,124 @@ the
 
 
         // //potential auton for skills in the future with odometry ---------------------------------------------------------------------------
-        drive(17.5, 100);
-        intake();
-        turnTo(-30, 100);
-        Flexwheel.spin(reverse, 100, percent);
-        drive(15, 20);
-        wait(1000, msec);
-        stop();
-        turnTo(-96, 100);  
-        wait(300, msec);
-        drive(-9.5, 60);
-        outtake();
-        wait(2000, msec);
-        stop(); //reaches goal
-        drive(30.7, 60); //turns back
-        turnTo(-54, 60);
-        drive(15, 50);
-        turnTo(-105, 60);
-        ExtendoOutA.set(true);
-        intake();
-        drive(12.7, 67);
-        wait(3000, msec);
-        stop();
-        ExtendoOutB.set(true);
-        drive(-20, 60);
-        outtake();
-        wait(3000, msec);
-        stop();
-        ExtendoOutB.set(false);
-        ExtendoOutA.set(false);
-        //code created since first match below
-        turnTo(-105, 60);
-        drive(5, 60);
-        turnTo(105, 60);
-        drive(5, 60); //change 5 for measured value of goal length + 1/2* length between tube and goal
-        turnTo(105, 60);
-        drive(5, 60); //change to 1/2 width of goal
-        turnTo(-105, 60);
-        ExtendoOutA.set(true); //ball out of tube remover
-        drive(-5, 60); //x value towards tube
-        intake();
-        drive(15, 60); //towards goal
-        wait(3000, msec);
-        stop();
-        ExtendoOutB.set(true); 
-        drive(5, 60); //reach goal
-        outtake();
-        wait(4000, msec);
-        stop();
-        ExtendoOutB.set(false);
-        ExtendoOutA.set(false);
-        drive(-5, 60); //back away from goal after scoring
-        turnTo(-105, 60);
-        drive(10, 60);
-        turnTo(105, 60);
-        drive(10, 60);
-        turnTo(-105, 60);
-        intake();
-        drive(30, 60); //long distance towards cluster of four cubes and collect
-        turnTo(105, 60);
-        stop();
-        drive(45, 60);
-        turnTo(130, 60);
-        ExtendoOutB.set(true);
-        drive(15.7, 60);
-        outtake();
-        wait(4000, msec);
-        stop();
-        ExtendoOutB.set(false);
-        drive(-30.7, 60);
-        turnTo(-130, 60);
-        drive(10, 60);
-        turnTo(-105, 60);
-        drive(10, 60);
-        turnTo(-105, 60);
-        ExtendoOutA.set(true);
-        wait(3000, msec);
-        intake();
-        drive(-12.5, 60);
-        drive(12.5, 60);
-        stop();
-        ExtendoOutB.set(true);
-        drive(5, 60);
-        outtake();
-        wait(4000, msec);
-        stop();
-        ExtendoOutA.set(false);
-        ExtendoOutB.set(false);
-        drive(-5, 60);
-        turnTo(105, 60);
-        drive(5, 60);
-        turnTo(-105, 60);
-        drive(25, 60);
-        turnTo(-105, 60);
-        drive(5, 60); 
-        turnTo(-105, 60);
-        intake();
-        ExtendoOutA.set(true);
-        drive(-5, 60);
-        wait(3000, msec);
-        drive(5, 60);
-        ExtendoOutB.set(true);
-        drive(5, 60);
-        outtake();
-        wait(4000, msec);
-        stop();
-        ExtendoOutA.set(false);
-        ExtendoOutB.set(false);
-        drive(5, 60);
-        turnTo(-105, 60);
-        drive(10, 60);
-        turnTo(-105, 60);
-        drive(30, 60);
-        turnTo(-105, 60);
-        drive(10, 60);
-        turnTo(195, 60);
-        drive(25, 100);
-        // //parked
-    }
+        // drive(17.5, 100);
+        // intake();
+        // turnTo(-30, 100);
+        // Flexwheel.spin(reverse, 100, percent);
+        // drive(15, 20);
+        // wait(1000, msec);
+        // stop();
+        // turnTo(-96, 100);  
+        // wait(300, msec);
+        // drive(-9.5, 60);
+        // outtake();
+        // wait(2000, msec);
+        // stop(); //reaches goal
+        // drive(30.7, 60); //turns back
+        // turnTo(-54, 60);
+        // drive(15, 50);
+        // turnTo(-105, 60);
+        // ExtendoOutA.set(true);
+        // intake();
+        // drive(12.7, 67);
+        // wait(3000, msec);
+        // stop();
+        // ExtendoOutB.set(true);
+        // drive(-20, 60);
+        // outtake();
+        // wait(3000, msec);
+        // stop();
+        // ExtendoOutB.set(false);
+        // ExtendoOutA.set(false);
+        // //code created since first match below
+        // turnTo(-105, 60);
+        // drive(5, 60);
+        // turnTo(105, 60);
+        // drive(5, 60); //change 5 for measured value of goal length + 1/2* length between tube and goal
+        // turnTo(105, 60);
+        // drive(5, 60); //change to 1/2 width of goal
+        // turnTo(-105, 60);
+        // ExtendoOutA.set(true); //ball out of tube remover
+        // drive(-5, 60); //x value towards tube
+        // intake();
+        // drive(15, 60); //towards goal
+        // wait(3000, msec);
+        // stop();
+        // ExtendoOutB.set(true); 
+        // drive(5, 60); //reach goal
+        // outtake();
+        // wait(4000, msec);
+        // stop();
+        // ExtendoOutB.set(false);
+        // ExtendoOutA.set(false);
+        // drive(-5, 60); //back away from goal after scoring
+        // turnTo(-105, 60);
+        // drive(10, 60);
+        // turnTo(105, 60);
+        // drive(10, 60);
+        // turnTo(-105, 60);
+        // intake();
+        // drive(30, 60); //long distance towards cluster of four cubes and collect
+        // turnTo(105, 60);
+        // stop();
+        // drive(45, 60);
+        // turnTo(130, 60);
+        // ExtendoOutB.set(true);
+        // drive(15.7, 60);
+        // outtake();
+        // wait(4000, msec);
+        // stop();
+        // ExtendoOutB.set(false);
+        // drive(-30.7, 60);
+        // turnTo(-130, 60);
+        // drive(10, 60);
+        // turnTo(-105, 60);
+        // drive(10, 60);
+        // turnTo(-105, 60);
+        // ExtendoOutA.set(true);
+        // wait(3000, msec);
+        // intake();
+        // drive(-12.5, 60);
+        // drive(12.5, 60);
+        // stop();
+        // ExtendoOutB.set(true);
+        // drive(5, 60);
+        // outtake();
+        // wait(4000, msec);
+        // stop();
+        // ExtendoOutA.set(false);
+        // ExtendoOutB.set(false);
+        // drive(-5, 60);
+        // turnTo(105, 60);
+        // drive(5, 60);
+        // turnTo(-105, 60);
+        // drive(25, 60);
+        // turnTo(-105, 60);
+        // drive(5, 60); 
+        // turnTo(-105, 60);
+        // intake();
+        // ExtendoOutA.set(true);
+        // drive(-5, 60);
+        // wait(3000, msec);
+        // drive(5, 60);
+        // ExtendoOutB.set(true);
+        // drive(5, 60);
+        // outtake();
+        // wait(4000, msec);
+        // stop();
+        // ExtendoOutA.set(false);
+        // ExtendoOutB.set(false);
+        // drive(5, 60);
+        // turnTo(-105, 60);
+        // drive(10, 60);
+        // turnTo(-105, 60);
+        // drive(30, 60);
+        // turnTo(-105, 60);
+        // drive(10, 60);
+        // turnTo(195, 60);
+        // drive(25, 100);
+        // // //parked
+    
     // Path
 
    else if (selectedAuton == 1) {
@@ -331,9 +329,52 @@ void drive(double distance, int speed){
     LeftMotors.setVelocity(absSpeed, percent);
     RightMotors.setVelocity(absSpeed, percent);
 
-    // Use spinFor on motor_group to move the wheels the required revolutions.
-    LeftMotors.spinFor(dir, revolutions, rev, false);
-    RightMotors.spinFor(dir, revolutions, rev, true);
+    // Smooth ramping profile: split the travel into segments and ramp
+    // up/down velocities so motors don't instantly jump to max speed.
+    // This conserves momentum and gives a snappy but controlled motion.
+    const int DEFAULT_SEGMENTS = 8;
+    const int ACCEL_SEGMENTS = 2;
+    const int DECEL_SEGMENTS = 2;
+    const int MIN_RAMP_VEL = 12; // percent - minimum to overcome stiction
+
+    // If very short distance, don't over-segment
+    int segments = DEFAULT_SEGMENTS;
+    if (revolutions < 0.5) {
+        int tmp = (int)ceil(revolutions * 4.0);
+        segments = (tmp > 1) ? tmp : 1;
+    }
+
+    if (segments <= 1) {
+        LeftMotors.spinFor(dir, revolutions, rev, false);
+        RightMotors.spinFor(dir, revolutions, rev, true);
+        return;
+    }
+
+    double segRevs = revolutions / (double)segments;
+
+    for (int i = 0; i < segments; ++i) {
+        int vel = absSpeed;
+        // accelerating
+        if (i < ACCEL_SEGMENTS) {
+            double t = (double)(i + 1) / (double)ACCEL_SEGMENTS; // 0..1
+            vel = (int)round(MIN_RAMP_VEL + t * (absSpeed - MIN_RAMP_VEL));
+        }
+        // decelerating
+        else if (i >= segments - DECEL_SEGMENTS) {
+            int j = segments - i; // 1..DECEL_SEGMENTS
+            double t = (double)j / (double)DECEL_SEGMENTS; // 0..1
+            vel = (int)round(MIN_RAMP_VEL + t * (absSpeed - MIN_RAMP_VEL));
+        } else {
+            vel = absSpeed;
+        }
+
+        LeftMotors.setVelocity(vel, percent);
+        RightMotors.setVelocity(vel, percent);
+
+        bool waitLast = (i == segments - 1);
+        LeftMotors.spinFor(dir, segRevs, rev, false);
+        RightMotors.spinFor(dir, segRevs, rev, waitLast);
+    }
 }
 
 void turnTo(double degrees, int speed) {
