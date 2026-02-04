@@ -22,6 +22,7 @@ motor_group LeftMotors = motor_group(LeftFront, LeftBack);
 digital_out ExtendoOutA = digital_out(Brain.ThreeWirePort.A);
 digital_out ExtendoOutB = digital_out(Brain.ThreeWirePort.B);
 digital_out Descorer = digital_out(Brain.ThreeWirePort.H);
+inertial Inertial = inertial(PORT19);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable

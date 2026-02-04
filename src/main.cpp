@@ -26,6 +26,7 @@
 #include "vex.h"
 #include "interface.h"
 #include "auton-config.h"
+#include "motion.h"
 
 using namespace vex;
 
@@ -88,6 +89,8 @@ void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
   pickTeam();
+  // Initialize motion subsystem (calibrate IMU)
+  motion::init();
 }
 
 /*---------------------------------------------------------------------------*/

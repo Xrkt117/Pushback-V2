@@ -22,15 +22,39 @@ void outtake();
 void stop();
 // If true, autonomous motor directions will be inverted to match driver control
 // Set to true when autonomous movement is observed to be reversed compared to driver control
-const bool invertAuton = true;
+// Motion / tuning constants (centralized for easier tuning)
+constexpr double WHEEL_DIAMETER_IN = 3.25;      // inches
+constexpr double TRACK_WIDTH_IN = 12.3;         // inches (distance between wheel centers)
+
+// Ramping profile (segment-based)
+const int DEFAULT_SEGMENTS = 8;
+const int ACCEL_SEGMENTS = 2;
+const int DECEL_SEGMENTS = 2;
+const int MIN_RAMP_VEL = 12; // percent - minimum to overcome stiction
+const double DECEL_EPSILON = 0.05; // fraction of speed remaining at end of decel
+
+// Turn controller (IMU-based)
+const double TURN_KP = 0.7;        // proportional gain for turn controller
+const double TURN_TOLERANCE = 1.5; // degrees
+const int TURN_MIN_POWER = 10;     // percent minimum power for turning
+const int TURN_LOOP_MS = 15;       // control loop period
+const int TURN_TIMEOUT_MS = 4000;  // timeout for safety
+
+// Invert autonomous directions to match driver control when necessary
+bool invertAuton = true;
+
+// Helper prototypes
+double wheelRevsForInches(double inches);
+void rampedDrive(double distance, int speed);
+void turnToRelativeIMU(double degrees, int speed);
 //Eaach autonomous routine will be varied in the future
 void autonomous(void) {
         //Auton Skills 
     if (selectedAuton == 0) {
        // picking up 3||4 balls auton (in work) ----------------------------------------------------------------------------------------
-        drive(20, 60);
+    drive(20, 60);
         wait(100, msec);
-        turnTo(-30, 30);
+    turnTo(-30, 30);
         wait(100, msec);
         Flexwheel.spin(reverse, 100, percent);
         intake();
@@ -300,44 +324,39 @@ void autonomous(void) {
         intake();
         wait(3, seconds);
         stop();
-
     }
 }
 
 //distance(inches)
 //speed(%)
 void drive(double distance, int speed){
-    // Convert linear distance (inches) to wheel revolutions.
-    // Wheel diameter is 3.25 inches. Update if different.
-    const double WHEEL_DIAMETER_IN = 3.25; 
-    const double wheel_circumference = WHEEL_DIAMETER_IN * PI; // inches per revolution
-    double revolutions = 0.0;
-    if (wheel_circumference > 0.0) {
-        double absDist = (distance >= 0.0) ? distance : -distance;
-        revolutions = absDist / wheel_circumference;
-    }
+    // wrapper that delegates to rampedDrive which uses centralized constants
+    rampedDrive(distance, speed);
+}
 
-    // Determine direction from sign of distance
+void turnTo(double degrees, int speed) {
+}
+    // Use IMU-based relative-turn controller for accurate turns
+    turnToRelativeIMU(degrees, speed);
+}
+
+// Helper: convert inches to wheel revolutions
+double wheelRevsForInches(double inches) {
+    return inches / (WHEEL_DIAMETER_IN * PI);
+}
+
+// Helper: segmented ramped drive implementation using centralized constants
+void rampedDrive(double distance, int speed) {
+    double absDist = (distance >= 0.0) ? distance : -distance;
+    double revolutions = wheelRevsForInches(absDist);
+
     directionType dir = (distance >= 0.0) ? directionType::fwd : directionType::rev;
-    // Optionally invert autonomous directions so autonomous matches driver control
-    if (invertAuton) {
-        dir = (dir == directionType::fwd) ? directionType::rev : directionType::fwd;
-    }
+    if (invertAuton) dir = (dir == directionType::fwd) ? directionType::rev : directionType::fwd;
 
-    // Use absolute speed for motor velocity
     int absSpeed = (speed >= 0) ? speed : -speed;
-    LeftMotors.setVelocity(absSpeed, percent);
-    RightMotors.setVelocity(absSpeed, percent);
+    LeftMotors.setStopping(brake);
+    RightMotors.setStopping(brake);
 
-    // Smooth ramping profile: split the travel into segments and ramp
-    // up/down velocities so motors don't instantly jump to max speed.
-    // This conserves momentum and gives a snappy but controlled motion.
-    const int DEFAULT_SEGMENTS = 8;
-    const int ACCEL_SEGMENTS = 2;
-    const int DECEL_SEGMENTS = 2;
-    const int MIN_RAMP_VEL = 12; // percent - minimum to overcome stiction
-
-    // If very short distance, don't over-segment
     int segments = DEFAULT_SEGMENTS;
     if (revolutions < 0.5) {
         int tmp = (int)ceil(revolutions * 4.0);
@@ -345,68 +364,81 @@ void drive(double distance, int speed){
     }
 
     if (segments <= 1) {
+        LeftMotors.setVelocity(absSpeed, percent);
+        RightMotors.setVelocity(absSpeed, percent);
         LeftMotors.spinFor(dir, revolutions, rev, false);
         RightMotors.spinFor(dir, revolutions, rev, true);
         return;
     }
 
     double segRevs = revolutions / (double)segments;
+    double lambda = 1.0;
+    if (DECEL_SEGMENTS > 1) lambda = -log(DECEL_EPSILON) / (double)(DECEL_SEGMENTS - 1);
 
     for (int i = 0; i < segments; ++i) {
         int vel = absSpeed;
-        // accelerating
         if (i < ACCEL_SEGMENTS) {
-            double t = (double)(i + 1) / (double)ACCEL_SEGMENTS; // 0..1
+            double t = (double)(i + 1) / (double)ACCEL_SEGMENTS;
             vel = (int)round(MIN_RAMP_VEL + t * (absSpeed - MIN_RAMP_VEL));
-        }
-        // decelerating
-        else if (i >= segments - DECEL_SEGMENTS) {
-            int j = segments - i; // 1..DECEL_SEGMENTS
-            double t = (double)j / (double)DECEL_SEGMENTS; // 0..1
-            vel = (int)round(MIN_RAMP_VEL + t * (absSpeed - MIN_RAMP_VEL));
+        } else if (i >= segments - DECEL_SEGMENTS) {
+            int idx = i - (segments - DECEL_SEGMENTS);
+            double factor = exp(-lambda * (double)idx);
+            vel = (int)round(MIN_RAMP_VEL + (absSpeed - MIN_RAMP_VEL) * factor);
         } else {
             vel = absSpeed;
         }
 
         LeftMotors.setVelocity(vel, percent);
         RightMotors.setVelocity(vel, percent);
-
         bool waitLast = (i == segments - 1);
         LeftMotors.spinFor(dir, segRevs, rev, false);
         RightMotors.spinFor(dir, segRevs, rev, waitLast);
     }
 }
 
-void turnTo(double degrees, int speed) {
-    // Track width (distance between wheels) is 12.3 inches
-    const double TRACK_WIDTH_IN = 12.3;
-    
-    // Calculate the arc length for the turn based on track width
-    double arcLength = (degrees / 360.0) * (TRACK_WIDTH_IN * PI);
-    
-    // Set velocities for rotation
-    int absSpeed = (speed >= 0) ? speed : -speed;
-    LeftMotors.setVelocity(absSpeed, percent);
-    RightMotors.setVelocity(absSpeed, percent);
-    
-    // Convert arc length to wheel revolutions
-    const double WHEEL_DIAMETER_IN = 3.25;
-    double absArc = (arcLength >= 0.0) ? arcLength : -arcLength;
-    double revolutions = absArc / (WHEEL_DIAMETER_IN * PI);
-    
-    // Determine turn direction based on angle
-    // Positive degrees = clockwise (right motors backward, left motors drive)
-    if (invertAuton) {
-        degrees = -degrees;
-    }
-    if(degrees >= 0) {
-        LeftMotors.spinFor(fwd, revolutions, rev, false);
-        RightMotors.spinFor(reverse, revolutions, rev, true);
-    } else {
-        LeftMotors.spinFor(reverse, revolutions, rev, false);
-        RightMotors.spinFor(fwd, revolutions, rev, true);
-    }
+// Helper: IMU-based relative turn
+static double normalizeAngle(double a) {
+    while (a > 180.0) a -= 360.0;
+    while (a <= -180.0) a += 360.0;
+    return a;
+}
 
+void turnToRelativeIMU(double degrees, int speed) {
+    if (invertAuton) degrees = -degrees;
+    int maxSpeed = (speed >= 0) ? speed : -speed;
+    if (maxSpeed > 100) maxSpeed = 100;
+    if (maxSpeed < 1) maxSpeed = 1;
+
+    double start = Inertial.rotation();
+    double target = start + degrees;
+
+    int elapsed = 0;
+    while (true) {
+        double current = Inertial.rotation();
+        double error = normalizeAngle(target - current);
+        double absErr = (error >= 0.0) ? error : -error;
+        if (absErr <= TURN_TOLERANCE) break;
+
+        double effort = TURN_KP * error;
+        double mag = (effort >= 0.0) ? effort : -effort;
+        if (mag < TURN_MIN_POWER) mag = TURN_MIN_POWER;
+        if (mag > maxSpeed) mag = maxSpeed;
+
+        if (error > 0) {
+            LeftMotors.spin(fwd, mag, percent);
+            RightMotors.spin(reverse, mag, percent);
+        } else {
+            LeftMotors.spin(reverse, mag, percent);
+            RightMotors.spin(fwd, mag, percent);
+        }
+
+        wait(TURN_LOOP_MS, msec);
+        elapsed += TURN_LOOP_MS;
+        if (elapsed >= TURN_TIMEOUT_MS) break;
+    }
+    LeftMotors.stop();
+    RightMotors.stop();
+    wait(20, msec);
 }
 
 void intake(){
