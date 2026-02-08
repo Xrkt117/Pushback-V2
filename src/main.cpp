@@ -68,10 +68,8 @@ void pickTeam() {
       Brain.Screen.setFont(mono60);
       if (x < 240) {
         isRedTeam = true;
-        drawTeamRed();   //red team detection
       } else {
         isRedTeam = false;
-        drawTeamBlue();   //blue team detection
       }
       Brain.Screen.setFont(mono20);
       wait(2, seconds);

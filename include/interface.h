@@ -11,7 +11,8 @@ void backButton();
 
 void drawMainBackground();
 void drawTeamSelect();
-void drawTeamRed();
-void drawTeamBlue();
-void drawBlueAuton();
-void drawRedAuton();
+// void drawTeamSelect();
+// void drawTeamRed();
+// void drawTeamBlue();
+// void drawBlueAuton();
+// void drawRedAuton();

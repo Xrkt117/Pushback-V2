@@ -15,8 +15,11 @@ const char* autonNames[] = {
 };
 
 // drive declarations so autonomous() can call these functions
-void drive(double distance, int speed);
-void turnTo(double degrees, int speed);
+// The last parameter 'coast' controls whether motors should coast (true)
+// or actively brake (false) after completing the movement. Default is false
+// to preserve existing behavior.
+void drive(double distance, int speed, bool coast = false);
+void turnTo(double degrees, int speed, bool coast = false);
 void intake();
 void outtake();
 void stop();
@@ -28,26 +31,45 @@ void autonomous(void) {
         //Auton Skills 
     if (selectedAuton == 0) {
        // picking up 3||4 balls auton (in work) ----------------------------------------------------------------------------------------
-        drive(20, 60);
-        wait(100, msec);
-        turnTo(-30, 30);
-        wait(100, msec);
+        drive(10, 80, false); 
+            wait(100, msec);
+        turnTo(-20, 30, true);
         Flexwheel.spin(reverse, 100, percent);
         intake();
-        drive(11, 20);
-        wait(500, msec);
+            wait(100, msec);
+        drive(11, 40);
         stop();
-        turnTo(-95, 60);
-        drive(-11, 40);
+            wait(100, msec);
+        turnTo(-93, 50, true);
+            wait(100, msec);
+        drive(-8.1, 70, true);
         Flexwheel.spin(fwd, 100, percent);
         outtake();
-        wait(5000, msec);
+            wait(3000, msec);
         stop();
         Flexwheel.stop();
-        drive(30, 70);
+        turnTo(-10, 60, true);
+        drive(28.5, 150, true); //Drive into match loader
+            wait(300, msec);
+        turnTo(-30, 80, true);
+        ExtendoOutA.set(true);
+        wait(300, msec);
+        drive(15, 150, true);
+        intake();
+            wait(1000, msec);
+        drive(2.0, 60, true);
+            wait(2000,msec);
+        stop();
+        ExtendoOutB.set(true);
+        wait(1000, msec);
+        drive(-12.0, 160, true);
+        ExtendoOutA.set(false);
+        outtake();
+        wait(3000, msec);
+        drive(4, 100, true);
+        turnTo(-90, 60, true);
     }
         
-
         //one ball auton
         // drive(-32, 70);
         // turnTo(32, 70);
@@ -197,116 +219,116 @@ void autonomous(void) {
     
     // Path
 
-   else if (selectedAuton == 1) {
-        // Left Red Auton
-        drive(20, 45);
-        turnTo(90, 45);
-        ExtendoOutB.set(true);
-        drive(25, 45);
-        turnTo(90, 45); 
-        drive(17, 60);
-        intake();
-        drive(1, 30);
-        wait(250, msec);
-        drive(1, 30);
-        wait(250, msec);
-        drive(1, 30);
-        wait(250, msec);
-        drive(1, 30);
-        wait(250, msec);
-        wait(2, seconds);
-        stop();
-        ExtendoOutA.set(true);
-        drive(-23, 45);
-        ExtendoOutB.set(false);
-        intake();
-        wait(3, seconds);
-        stop();
+//    else if (selectedAuton == 1) {
+//         // Left Red Auton
+//         drive(20, 45);
+//         turnTo(90, 45);
+//         ExtendoOutB.set(true);
+//         drive(25, 45);
+//         turnTo(90, 45); 
+//         drive(17, 60);
+//         intake();
+//         drive(1, 30);
+//         wait(250, msec);
+//         drive(1, 30);
+//         wait(250, msec);
+//         drive(1, 30);
+//         wait(250, msec);
+//         drive(1, 30);
+//         wait(250, msec);
+//         wait(2, seconds);
+//         stop();
+//         ExtendoOutA.set(true);
+//         drive(-23, 45);
+//         ExtendoOutB.set(false);
+//         intake();
+//         wait(3, seconds);
+//         stop();
 
-    } else if (selectedAuton == 2) {
-        // Right Red Auton
-        drive(20, 45);
-        turnTo(-90, 45);
-        ExtendoOutB.set(true);
-        drive(25, 45);
-        turnTo(-90, 45); 
-        drive(17, 60);
-        intake();
-        drive(1, 30);
-        wait(250, msec);
-        drive(1, 30);
-        wait(250, msec);
-        drive(1, 30);
-        wait(250, msec);
-        drive(1, 30);
-        wait(250, msec);
-        wait(2, seconds);
-        stop();
-        ExtendoOutA.set(true);
-        drive(-23, 45);
-        ExtendoOutB.set(false);
-        intake();
-        wait(3, seconds);
-        stop();
+//     } else if (selectedAuton == 2) {
+//         // Right Red Auton
+//         drive(20, 45);
+//         turnTo(-90, 45);
+//         ExtendoOutB.set(true);
+//         drive(25, 45);
+//         turnTo(-90, 45); 
+//         drive(17, 60);
+//         intake();
+//         drive(1, 30);
+//         wait(250, msec);
+//         drive(1, 30);
+//         wait(250, msec);
+//         drive(1, 30);
+//         wait(250, msec);
+//         drive(1, 30);
+//         wait(250, msec);
+//         wait(2, seconds);
+//         stop();
+//         ExtendoOutA.set(true);
+//         drive(-23, 45);
+//         ExtendoOutB.set(false);
+//         intake();
+//         wait(3, seconds);
+//         stop();
 
-    } else if (selectedAuton == 3) {
-        // Left Blue Auton
-        drive(20, 45);
-        turnTo(90, 45);
-        ExtendoOutB.set(true);
-        drive(25, 45);
-        turnTo(90, 45); 
-        drive(17, 60);
-        intake();
-        drive(1, 30);
-        wait(250, msec);
-        drive(1, 30);
-        wait(250, msec);
-        drive(1, 30);
-        wait(250, msec);
-        drive(1, 30);
-        wait(250, msec);
-        wait(2, seconds);
-        stop();
-        ExtendoOutA.set(true);
-        drive(-23, 45);
-        ExtendoOutB.set(false);
-        intake();
-        wait(3, seconds);
-        stop();
+//     } else if (selectedAuton == 3) {
+//         // Left Blue Auton
+//         drive(20, 45);
+//         turnTo(90, 45);
+//         ExtendoOutB.set(true);
+//         drive(25, 45);
+//         turnTo(90, 45); 
+//         drive(17, 60);
+//         intake();
+//         drive(1, 30);
+//         wait(250, msec);
+//         drive(1, 30);
+//         wait(250, msec);
+//         drive(1, 30);
+//         wait(250, msec);
+//         drive(1, 30);
+//         wait(250, msec);
+//         wait(2, seconds);
+//         stop();
+//         ExtendoOutA.set(true);
+//         drive(-23, 45);
+//         ExtendoOutB.set(false);
+//         intake();
+//         wait(3, seconds);
+//         stop();
 
-    } else if (selectedAuton == 4) {
-        // Right Blue Auton
-        drive(20, 45);
-        turnTo(-90, 45);
-        ExtendoOutB.set(true);
-        drive(25, 45);
-        turnTo(-90, 45); 
-        drive(17, 60);
-        intake();
-        drive(1, 30);
-        wait(250, msec);
-        drive(1, 30);
-        wait(250, msec);
-        drive(1, 30);
-        wait(250, msec);
-        drive(1, 30);
-        wait(250, msec);
-        wait(2, seconds);
-        stop();
-        ExtendoOutA.set(true);
-        drive(-23, 45);
-        ExtendoOutB.set(false);
-        intake();
-        wait(3, seconds);
-        stop();
+//     } else if (selectedAuton == 4) {
+//         // Right Blue Auton
+//         drive(20, 45);
+//         turnTo(-90, 45);
+//         ExtendoOutB.set(true);
+//         drive(25, 45);
+//         turnTo(-90, 45); 
+//         drive(17, 60);
+//         intake();
+//         drive(1, 30);
+//         wait(250, msec);
+//         drive(1, 30);
+//         wait(250, msec);
+//         drive(1, 30);
+//         wait(250, msec);
+//         drive(1, 30);
+//         wait(250, msec);
+//         wait(2, seconds);
+//         stop();
+//         ExtendoOutA.set(true);
+//         drive(-23, 45);
+//         ExtendoOutB.set(false);
+//         intake();
+//         wait(3, seconds);
+//         stop();
 
-    }
+//     }
 }
 
 //distance(inches)
 //speed(%)
-void drive(double distance, int speed){
+void drive(double distance, int speed, bool coast) {
     // Convert linear distance (inches) to wheel revolutions.
     // Wheel diameter is 3.25 inches. Update if different.
     const double WHEEL_DIAMETER_IN = 3.25; 
@@ -329,55 +351,25 @@ void drive(double distance, int speed){
     LeftMotors.setVelocity(absSpeed, percent);
     RightMotors.setVelocity(absSpeed, percent);
 
-    // Smooth ramping profile: split the travel into segments and ramp
-    // up/down velocities so motors don't instantly jump to max speed.
-    // This conserves momentum and gives a snappy but controlled motion.
-    const int DEFAULT_SEGMENTS = 8;
-    const int ACCEL_SEGMENTS = 2;
-    const int DECEL_SEGMENTS = 2;
-    const int MIN_RAMP_VEL = 12; // percent - minimum to overcome stiction
-
-    // If very short distance, don't over-segment
-    int segments = DEFAULT_SEGMENTS;
-    if (revolutions < 0.5) {
-        int tmp = (int)ceil(revolutions * 4.0);
-        segments = (tmp > 1) ? tmp : 1;
+    // Configure stopping behavior: if coast==true then set motors to coast
+    // at the end of movement so they are not actively driven to zero.
+    if (coast) {
+        LeftMotors.setStopping(brakeType::coast);
+        RightMotors.setStopping(brakeType::coast);
+    } else {
+        LeftMotors.setStopping(brakeType::brake);
+        RightMotors.setStopping(brakeType::brake);
     }
 
-    if (segments <= 1) {
-        LeftMotors.spinFor(dir, revolutions, rev, false);
-        RightMotors.spinFor(dir, revolutions, rev, true);
-        return;
-    }
-
-    double segRevs = revolutions / (double)segments;
-
-    for (int i = 0; i < segments; ++i) {
-        int vel = absSpeed;
-        // accelerating
-        if (i < ACCEL_SEGMENTS) {
-            double t = (double)(i + 1) / (double)ACCEL_SEGMENTS; // 0..1
-            vel = (int)round(MIN_RAMP_VEL + t * (absSpeed - MIN_RAMP_VEL));
-        }
-        // decelerating
-        else if (i >= segments - DECEL_SEGMENTS) {
-            int j = segments - i; // 1..DECEL_SEGMENTS
-            double t = (double)j / (double)DECEL_SEGMENTS; // 0..1
-            vel = (int)round(MIN_RAMP_VEL + t * (absSpeed - MIN_RAMP_VEL));
-        } else {
-            vel = absSpeed;
-        }
-
-        LeftMotors.setVelocity(vel, percent);
-        RightMotors.setVelocity(vel, percent);
-
-        bool waitLast = (i == segments - 1);
-        LeftMotors.spinFor(dir, segRevs, rev, false);
-        RightMotors.spinFor(dir, segRevs, rev, waitLast);
-    }
+    // Simpler single-command drive: run both motor groups for the
+    // full number of wheel revolutions at the configured velocity.
+    // This removes the previous segmented ramping logic and leaves
+    // stopping behavior controlled by the 'coast' flag above.
+    LeftMotors.spinFor(dir, revolutions, rev, false);
+    RightMotors.spinFor(dir, revolutions, rev, true);
 }
 
-void turnTo(double degrees, int speed) {
+void turnTo(double degrees, int speed, bool coast) {
     // Track width (distance between wheels) is 12.3 inches
     const double TRACK_WIDTH_IN = 12.3;
     
@@ -388,6 +380,15 @@ void turnTo(double degrees, int speed) {
     int absSpeed = (speed >= 0) ? speed : -speed;
     LeftMotors.setVelocity(absSpeed, percent);
     RightMotors.setVelocity(absSpeed, percent);
+
+    // Configure stopping behavior
+    if (coast) {
+        LeftMotors.setStopping(brakeType::coast);
+        RightMotors.setStopping(brakeType::coast);
+    } else {
+        LeftMotors.setStopping(brakeType::brake);
+        RightMotors.setStopping(brakeType::brake);
+    }
     
     // Convert arc length to wheel revolutions
     const double WHEEL_DIAMETER_IN = 3.25;

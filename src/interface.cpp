@@ -42,9 +42,9 @@ void drawMainMenu() {
 
 void drawAutonMenu() {
   if (isRedTeam) {
-    drawRedAuton();
+    // drawRedAuton();
   } else {
-    drawBlueAuton();
+    // drawBlueAuton();
   }
   backButton();
 }
@@ -84,37 +84,37 @@ void handleTouch() {
       if(x > 40 && x < 200 && y > 40 && y < 200){
         selectedAuton = 1;  // Left Red
         currentScreen = 0;
-        drawMainMenu();
+        // drawMainMenu();
 
       }
       if(x > 280 && x < 440 && y > 40 && y < 200){
         selectedAuton = 2;  // Right Red
         currentScreen = 0;
-        drawMainMenu();
+        // drawMainMenu();
       }
     } else {
       drawAutonMenu();
       if(x > 40 && x < 200 && y > 40 && y < 200){
         selectedAuton = 3;  // Left Blue
         currentScreen = 0;
-        drawMainMenu();
+        // drawMainMenu();
       }
       if(x > 280 && x < 440 && y > 40 && y < 200){
         selectedAuton = 4;  // Right Blue
         currentScreen = 0;
-        drawMainMenu();
+        // drawMainMenu();
       }
     }
     // Back button
     if (x < 80 && y > 200) {
       currentScreen = 0;
-      drawMainMenu();
+      // drawMainMenu();
 
     }
   } else if (currentScreen == 2) {
     if (x < 80 && y > 200) {
       currentScreen = 0;
-      drawMainMenu();
+      // drawMainMenu();
     }
   }
 
