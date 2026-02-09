@@ -326,62 +326,44 @@ void autonomous(void) {
 //     }
 }
 
-//distance(inches)
-//speed(%)
+// distance = inches, speed = percent. coast = true to coast at end.
 void drive(double distance, int speed, bool coast) {
-    // Convert linear distance (inches) to wheel revolutions.
-    // Wheel diameter is 3.25 inches. Update if different.
-    const double WHEEL_DIAMETER_IN = 3.25; 
-    const double wheel_circumference = WHEEL_DIAMETER_IN * PI; // inches per revolution
-    double revolutions = 0.0;
-    if (wheel_circumference > 0.0) {
-        double absDist = (distance >= 0.0) ? distance : -distance;
-        revolutions = absDist / wheel_circumference;
-    }
+    const double WHEEL_DIAMETER_IN = 3.25;
+    double revolutions = fabs(distance) / (WHEEL_DIAMETER_IN * PI);
 
-    // Determine direction from sign of distance
-    directionType dir = (distance >= 0.0) ? directionType::fwd : directionType::rev;
-    // Optionally invert autonomous directions so autonomous matches driver control
-    if (invertAuton) {
-        dir = (dir == directionType::fwd) ? directionType::rev : directionType::fwd;
-    }
+    directionType dir = (distance >= 0.0) ? forward : reverse;
+    if (invertAuton) dir = (dir == forward) ? reverse : forward;
 
-    // Use absolute speed for motor velocity
-    int absSpeed = (speed >= 0) ? speed : -speed;
-    LeftMotors.setVelocity(absSpeed, percent);
-    RightMotors.setVelocity(absSpeed, percent);
+    int pct = (speed >= 0) ? speed : -speed;    
+    LeftMotors.setVelocity(pct, percent);
+    RightMotors.setVelocity(pct, percent);
+    LeftMotors.setStopping(coast ? brakeType::coast : brakeType::brake);
+    RightMotors.setStopping(coast ? brakeType::coast : brakeType::brake);
 
-    // Configure stopping behavior: if coast==true then set motors to coast
-    // at the end of movement so they are not actively driven to zero.
-    if (coast) {
-        LeftMotors.setStopping(brakeType::coast);
-        RightMotors.setStopping(brakeType::coast);
-    } else {
-        LeftMotors.setStopping(brakeType::brake);
-        RightMotors.setStopping(brakeType::brake);
-    }
-
-    // Simpler single-command drive: run both motor groups for the
-    // full number of wheel revolutions at the configured velocity.
-    // This removes the previous segmented ramping logic and leaves
-    // stopping behavior controlled by the 'coast' flag above.
     LeftMotors.spinFor(dir, revolutions, rev, false);
     RightMotors.spinFor(dir, revolutions, rev, true);
 }
 
-void turnTo(double degrees, int speed, bool coast) {
-    // Track width (distance between wheels) is 12.3 inches
-    const double TRACK_WIDTH_IN = 12.3;
-    
-    // Calculate the arc length for the turn based on track width
-    double arcLength = (degrees / 360.0) * (TRACK_WIDTH_IN * PI);
-    
-    // Set velocities for rotation
-    int absSpeed = (speed >= 0) ? speed : -speed;
-    LeftMotors.setVelocity(absSpeed, percent);
-    RightMotors.setVelocity(absSpeed, percent);
+// Normalize angle error to -180..180 (shortest turn)
+static double normalizeAngleError(double error) {
+    while (error > 180.0)  error -= 360.0;
+    while (error < -180.0) error += 360.0;
+    return error;
+}
 
-    // Configure stopping behavior
+void turnTo(double degrees, int speed, bool coast) {
+    const double kP = 1.2;           // P gain: tune if turn is too weak or too aggressive
+    const double toleranceDeg = 2.0; // Stop when within this many degrees
+    const int maxSpeed = (speed >= 0) ? speed : -speed;
+    const int minPower = 15;         // Minimum power to overcome friction
+    const int timeoutMs = 3000;      // Stop after this long even if not settled
+
+    if (invertAuton) degrees = -degrees;
+
+    double targetHeading = IMU.heading() + degrees;
+    while (targetHeading >= 360.0) targetHeading -= 360.0;
+    while (targetHeading < 0.0)    targetHeading += 360.0;
+
     if (coast) {
         LeftMotors.setStopping(brakeType::coast);
         RightMotors.setStopping(brakeType::coast);
@@ -389,25 +371,33 @@ void turnTo(double degrees, int speed, bool coast) {
         LeftMotors.setStopping(brakeType::brake);
         RightMotors.setStopping(brakeType::brake);
     }
-    
-    // Convert arc length to wheel revolutions
-    const double WHEEL_DIAMETER_IN = 3.25;
-    double absArc = (arcLength >= 0.0) ? arcLength : -arcLength;
-    double revolutions = absArc / (WHEEL_DIAMETER_IN * PI);
-    
-    // Determine turn direction based on angle
-    // Positive degrees = clockwise (right motors backward, left motors drive)
-    if (invertAuton) {
-        degrees = -degrees;
-    }
-    if(degrees >= 0) {
-        LeftMotors.spinFor(fwd, revolutions, rev, false);
-        RightMotors.spinFor(reverse, revolutions, rev, true);
-    } else {
-        LeftMotors.spinFor(reverse, revolutions, rev, false);
-        RightMotors.spinFor(fwd, revolutions, rev, true);
-    }
 
+    int startTime = (int)Brain.Timer.time(msec);
+    while (true) {
+        double current = IMU.heading();
+        double error = normalizeAngleError(targetHeading - current);
+
+        if (error < toleranceDeg && error > -toleranceDeg) break;
+        if ((int)Brain.Timer.time(msec) - startTime > timeoutMs) break;
+
+        double power = kP * error;
+        if (power > maxSpeed)  power = maxSpeed;
+        if (power < -maxSpeed) power = -maxSpeed;
+        if (power > 0 && power < minPower)  power = minPower;
+        if (power < 0 && power > -minPower) power = -minPower;
+
+        int pct = (int)power;
+        if (pct > 0) {
+            LeftMotors.spin(reverse, pct, percent);
+            RightMotors.spin(fwd, pct, percent);
+        } else {
+            LeftMotors.spin(fwd, -pct, percent);
+            RightMotors.spin(reverse, -pct, percent);
+        }
+        wait(20, msec);
+    }
+    LeftMotors.stop();
+    RightMotors.stop();
 }
 
 void intake(){

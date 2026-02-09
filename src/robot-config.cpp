@@ -34,5 +34,6 @@ bool RemoteControlCodeEnabled = true;
  * This should be called at the start of your int main function.
  */
 void vexcodeInit( void ) {
-  // nothing to initialize
+  IMU.calibrate();
+  while (IMU.isCalibrating()) { wait(50, msec); }
 }
