@@ -41,11 +41,59 @@ void drawMainMenu() {
 }
 
 void drawAutonMenu() {
+  drawMainBackground();
+  
+  // Title
+  Brain.Screen.setFont(prop30);
+  Brain.Screen.setPenColor(white);
+  Brain.Screen.printAt(150, 70, "SELECT AUTON");
+  
   if (isRedTeam) {
-    // drawRedAuton();
+    // Left Red button
+    Brain.Screen.setPenColor(black);
+    Brain.Screen.drawRectangle(45, 45, 155, 155, color(30, 30, 30));  // shadow
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.setFillColor(color(200, 50, 50));
+    Brain.Screen.drawRectangle(40, 40, 160, 160);  // button
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.setFont(prop20);
+    Brain.Screen.printAt(70, 100, "LEFT");
+    Brain.Screen.printAt(65, 130, "RED");
+    
+    // Right Red button
+    Brain.Screen.setPenColor(black);
+    Brain.Screen.drawRectangle(285, 45, 155, 155, color(30, 30, 30));  // shadow
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.setFillColor(color(200, 50, 50));
+    Brain.Screen.drawRectangle(280, 40, 160, 160);  // button
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.setFont(prop20);
+    Brain.Screen.printAt(310, 100, "RIGHT");
+    Brain.Screen.printAt(315, 130, "RED");
   } else {
-    // drawBlueAuton();
+    // Left Blue button
+    Brain.Screen.setPenColor(black);
+    Brain.Screen.drawRectangle(45, 45, 155, 155, color(30, 30, 30));  // shadow
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.setFillColor(color(50, 50, 200));
+    Brain.Screen.drawRectangle(40, 40, 160, 160);  // button
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.setFont(prop20);
+    Brain.Screen.printAt(70, 100, "LEFT");
+    Brain.Screen.printAt(65, 130, "BLUE");
+    
+    // Right Blue button
+    Brain.Screen.setPenColor(black);
+    Brain.Screen.drawRectangle(285, 45, 155, 155, color(30, 30, 30));  // shadow
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.setFillColor(color(50, 50, 200));
+    Brain.Screen.drawRectangle(280, 40, 160, 160);  // button
+    Brain.Screen.setPenColor(white);
+    Brain.Screen.setFont(prop20);
+    Brain.Screen.printAt(310, 100, "RIGHT");
+    Brain.Screen.printAt(310, 130, "BLUE");
   }
+  
   backButton();
 }
 
@@ -80,41 +128,37 @@ void handleTouch() {
   } else if (currentScreen == 1) {
     // Auton selection depending on which team you are on
     if(isRedTeam){
-      drawAutonMenu();
       if(x > 40 && x < 200 && y > 40 && y < 200){
         selectedAuton = 1;  // Left Red
         currentScreen = 0;
-        // drawMainMenu();
-
+        drawMainMenu();
       }
       if(x > 280 && x < 440 && y > 40 && y < 200){
         selectedAuton = 2;  // Right Red
         currentScreen = 0;
-        // drawMainMenu();
+        drawMainMenu();
       }
     } else {
-      drawAutonMenu();
       if(x > 40 && x < 200 && y > 40 && y < 200){
         selectedAuton = 3;  // Left Blue
         currentScreen = 0;
-        // drawMainMenu();
+        drawMainMenu();
       }
       if(x > 280 && x < 440 && y > 40 && y < 200){
         selectedAuton = 4;  // Right Blue
         currentScreen = 0;
-        // drawMainMenu();
+        drawMainMenu();
       }
     }
     // Back button
     if (x < 80 && y > 200) {
       currentScreen = 0;
-      // drawMainMenu();
-
+      drawMainMenu();
     }
   } else if (currentScreen == 2) {
     if (x < 80 && y > 200) {
       currentScreen = 0;
-      // drawMainMenu();
+      drawMainMenu();
     }
   }
 

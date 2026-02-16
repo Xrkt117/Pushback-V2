@@ -28,6 +28,8 @@ void stop();
 const bool invertAuton = true;
 //Eaach autonomous routine will be varied in the future
 void autonomous(void) {
+    IMU.setHeading(0, degrees);
+
         //Auton Skills 
     if (selectedAuton == 0) {
        // picking up 3||4 balls auton (in work) ----------------------------------------------------------------------------------------
@@ -351,48 +353,34 @@ static double normalizeAngleError(double error) {
     return error;
 }
 
+// Turn by degrees (relative). Uses inertial to stop when target heading is reached; fixed speed, no PID.
 void turnTo(double degrees, int speed, bool coast) {
-    const double kP = 1.2;           // P gain: tune if turn is too weak or too aggressive
-    const double toleranceDeg = 2.0; // Stop when within this many degrees
-    const int maxSpeed = (speed >= 0) ? speed : -speed;
-    const int minPower = 15;         // Minimum power to overcome friction
-    const int timeoutMs = 3000;      // Stop after this long even if not settled
-
+    const double toleranceDeg = 2.0;
+    const int timeoutMs = 3000;
+    int turnSpeed = (speed >= 0) ? speed : -speed;
     if (invertAuton) degrees = -degrees;
 
     double targetHeading = IMU.heading() + degrees;
     while (targetHeading >= 360.0) targetHeading -= 360.0;
     while (targetHeading < 0.0)    targetHeading += 360.0;
 
-    if (coast) {
-        LeftMotors.setStopping(brakeType::coast);
-        RightMotors.setStopping(brakeType::coast);
-    } else {
-        LeftMotors.setStopping(brakeType::brake);
-        RightMotors.setStopping(brakeType::brake);
-    }
+    LeftMotors.setStopping(coast ? brakeType::coast : brakeType::brake);
+    RightMotors.setStopping(coast ? brakeType::coast : brakeType::brake);
 
     int startTime = (int)Brain.Timer.time(msec);
     while (true) {
         double current = IMU.heading();
         double error = normalizeAngleError(targetHeading - current);
 
-        if (error < toleranceDeg && error > -toleranceDeg) break;
+        if (error > -toleranceDeg && error < toleranceDeg) break;
         if ((int)Brain.Timer.time(msec) - startTime > timeoutMs) break;
 
-        double power = kP * error;
-        if (power > maxSpeed)  power = maxSpeed;
-        if (power < -maxSpeed) power = -maxSpeed;
-        if (power > 0 && power < minPower)  power = minPower;
-        if (power < 0 && power > -minPower) power = -minPower;
-
-        int pct = (int)power;
-        if (pct > 0) {
-            LeftMotors.spin(reverse, pct, percent);
-            RightMotors.spin(fwd, pct, percent);
+        if (error > 0) {
+            LeftMotors.spin(reverse, turnSpeed, percent);
+            RightMotors.spin(fwd, turnSpeed, percent);
         } else {
-            LeftMotors.spin(fwd, -pct, percent);
-            RightMotors.spin(reverse, -pct, percent);
+            LeftMotors.spin(fwd, turnSpeed, percent);
+            RightMotors.spin(reverse, turnSpeed, percent);
         }
         wait(20, msec);
     }
