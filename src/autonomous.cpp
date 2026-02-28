@@ -19,7 +19,7 @@ const char* autonNames[] = {
 // or actively brake (false) after completing the movement. Default is false
 // to preserve existing behavior.
 void drive(double distance, int speed, bool coast = false);
-void turnTo(double degrees, int speed, bool coast = false);
+void turnTo(double targetHeading, int speed, bool coast = false);
 void intake();
 void outtake();
 void stop();
@@ -33,9 +33,9 @@ void autonomous(void) {
         //Auton Skills 
     if (selectedAuton == 0) {
        // picking up 3||4 balls auton (in work) ----------------------------------------------------------------------------------------
-        drive(10, 80, false); 
+        drive(25, 65, false); 
             wait(100, msec);
-        turnTo(-20, 30, true);
+        turnTo(20, 30, true);
         Flexwheel.spin(reverse, 100, percent);
         intake();
             wait(100, msec);
@@ -353,14 +353,15 @@ static double normalizeAngleError(double error) {
     return error;
 }
 
-// Turn by degrees (relative). Uses inertial to stop when target heading is reached; fixed speed, no PID.
-void turnTo(double degrees, int speed, bool coast) {
+// Turn to an absolute heading (0-360). Automatically takes the shortest path.
+// e.g. if facing 0° and you call turnTo(20), it turns 20° clockwise.
+// if facing 0° and you call turnTo(350), it turns 10° counter-clockwise.
+void turnTo(double targetHeading, int speed, bool coast) {
     const double toleranceDeg = 2.0;
     const int timeoutMs = 3000;
     int turnSpeed = (speed >= 0) ? speed : -speed;
-    if (invertAuton) degrees = -degrees;
 
-    double targetHeading = IMU.heading() + degrees;
+    // Normalize target to 0-360
     while (targetHeading >= 360.0) targetHeading -= 360.0;
     while (targetHeading < 0.0)    targetHeading += 360.0;
 
@@ -372,9 +373,13 @@ void turnTo(double degrees, int speed, bool coast) {
         double current = IMU.heading();
         double error = normalizeAngleError(targetHeading - current);
 
-        if (error > -toleranceDeg && error < toleranceDeg) break;
+        if (fabs(error) < toleranceDeg) break;
         if ((int)Brain.Timer.time(msec) - startTime > timeoutMs) break;
 
+        // error > 0 means target is clockwise from current
+        // error < 0 means target is counter-clockwise from current
+        // Try one direction; if the robot actually turns the wrong way,
+        // the error will grow and flip sign, self-correcting to the other direction.
         if (error > 0) {
             LeftMotors.spin(reverse, turnSpeed, percent);
             RightMotors.spin(fwd, turnSpeed, percent);

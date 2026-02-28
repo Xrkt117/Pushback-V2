@@ -114,13 +114,13 @@ void usercontrol(void) {
   int forwardVal = -Controller1.Axis3.position(percent); // forward/backward
     int turnVal = Controller1.Axis1.position(percent); // left/right
 
-    // drivetrain commands instead of raw motor spins
-    int leftSpeed = forwardVal - turnVal;
-    int rightSpeed = forwardVal + turnVal;
+    // drivetrain - use voltage for direct linear response (no internal PID ramping)
+    // 12V is max; scale joystick percent (-100 to 100) to volts (-12 to 12)
+    double leftVolt  = (forwardVal - turnVal) * 12.0 / 100.0;
+    double rightVolt = (forwardVal + turnVal) * 12.0 / 100.0;
 
-    //motor speed appliance
-    LeftMotors.spin(fwd, leftSpeed, percent);
-    RightMotors.spin(fwd, rightSpeed, percent);
+    LeftMotors.spin(fwd, leftVolt, volt);
+    RightMotors.spin(fwd, rightVolt, volt);
 
     //Intake Controls
     if (Controller1.ButtonR1.pressing()) {
