@@ -13,8 +13,8 @@ extern motor Intake;
 extern motor SMechanism;
 extern motor_group RightMotors;
 extern motor_group LeftMotors;
-extern digital_out ExtendoOutA; //top flex scoring
-extern digital_out ExtendoOutB; //match loader
+extern digital_out matchloader; //top flex scoring
+extern digital_out longGoal; //match loader
 extern digital_out Descorer;
 extern motor Flexwheel;
 extern inertial IMU;

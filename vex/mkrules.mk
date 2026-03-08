@@ -1,5 +1,4 @@
 # VEXcode mkrules.mk 2019_03_26_01
-
 # compile C files
 $(BUILD)/%.o: %.c $(SRC_H)
 	$(Q)$(MKDIR)
@@ -14,7 +13,7 @@ $(BUILD)/%.o: %.cpp $(SRC_H) $(SRC_A)
 	
 # create executable 
 $(BUILD)/$(PROJECT).elf: $(OBJ)
-	$(ECHO) "LINK $@"
+	$(ECHO) "LINK $@" 
 	$(Q)$(LINK) $(LNK_FLAGS) -o $@ $^ $(LIBS)
 	$(Q)$(SIZE) $@
 

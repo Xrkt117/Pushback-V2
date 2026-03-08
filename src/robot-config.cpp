@@ -19,10 +19,10 @@ motor SMechanism = motor(PORT17, ratio18_1, true);
 motor Flexwheel = motor(PORT18, ratio18_1, false);
 motor_group RightMotors = motor_group(RightFront, RightBack);
 motor_group LeftMotors = motor_group(LeftFront, LeftBack);
-digital_out ExtendoOutA = digital_out(Brain.ThreeWirePort.A);
-digital_out ExtendoOutB = digital_out(Brain.ThreeWirePort.B);
+digital_out matchloader = digital_out(Brain.ThreeWirePort.A);
+digital_out longGoal = digital_out(Brain.ThreeWirePort.B);
 digital_out Descorer = digital_out(Brain.ThreeWirePort.H);
-inertial IMU = inertial(PORT20);
+inertial IMU = inertial(PORT19);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable

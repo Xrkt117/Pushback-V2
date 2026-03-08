@@ -32,22 +32,19 @@ using namespace vex;
 // A global instance of competition
 competition Competition;
 
-//Team Variable
-bool isRedTeam = true;
-
 // Pneumatics toggle state
-bool extendoAState = false;
-bool extendoBState = false;
+bool matchloaderState = false;
+bool longGoalState = false;
 bool descorerState = false;
 
-void toggleExtendoA() {
-  extendoAState = !extendoAState;
-  ExtendoOutA.set(extendoAState);
+void toggleMatchloader() {
+  matchloaderState = !matchloaderState;
+  matchloader.set(matchloaderState);
 }
 
-void toggleExtendoB() {
-  extendoBState = !extendoBState;
-  ExtendoOutB.set(extendoBState);
+void toggleLongGoal() {
+  longGoalState = !longGoalState;
+  longGoal.set(longGoalState);
 }
 
 void toggleDescorer() {
@@ -56,23 +53,32 @@ void toggleDescorer() {
 }
 
 /*---------------------------------------------------------------------------*/
-/*                             Team Picker                                   */
+/*                             Mode Picker                                   */
 /*---------------------------------------------------------------------------*/
-void pickTeam() {
-  Brain.Screen.clearScreen();
-  drawTeamSelect();
+void pickMode() {
+  Brain.Screen.clearScreen(color(20, 20, 20));
 
-  while(true) {
+  // Skills button (left half)
+  Brain.Screen.setPenColor(white);
+  Brain.Screen.setFillColor(color(0, 150, 150));
+  Brain.Screen.drawRectangle(20, 40, 210, 160);
+  Brain.Screen.setFont(prop40);
+  Brain.Screen.printAt(60, 130, "SKILLS");
+
+  // Match button (right half)
+  Brain.Screen.setFillColor(color(200, 100, 0));
+  Brain.Screen.drawRectangle(250, 40, 210, 160);
+  Brain.Screen.printAt(290, 130, "MATCH");
+
+  while (true) {
     if (Brain.Screen.pressing()) {
       int x = Brain.Screen.xPosition();
-      Brain.Screen.setFont(mono60);
       if (x < 240) {
-        isRedTeam = true;
+        selectedAuton = 0;  // Skills
       } else {
-        isRedTeam = false;
+        selectedAuton = 1;  // Match
       }
-      Brain.Screen.setFont(mono20);
-      wait(2, seconds);
+      wait(300, msec);
       break;
     }
     wait(20, msec);
@@ -85,29 +91,28 @@ void pickTeam() {
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
-  pickTeam();
-}
+  pickMode();
 
-/*---------------------------------------------------------------------------*/
-/*                              Autonomous Task                              */
-/*---------------------------------------------------------------------------*/
+  // Calibrate IMU during setup so no delay in auton
+  IMU.calibrate();
+  while (IMU.isCalibrating()) {
+      wait(20, msec);
+  }
+}
 
 /*---------------------------------------------------------------------------*/
 /*                              User Control Task                            */
 /*---------------------------------------------------------------------------*/
 void usercontrol(void) {
-  // Color sensor not present/defined in this build; skip initialization
-  // ColorSensor.setLightPower(100, percent);
-  // ColorSensor.setLight(ledState::on);
 
   // Initialize pneumatics default states and register toggle handlers (once)
-  ExtendoOutA.set(extendoAState);
-  ExtendoOutB.set(extendoBState);
+  matchloader.set(matchloaderState);
+  longGoal.set(longGoalState);
   Descorer.set(descorerState);
-  Controller1.ButtonY.pressed(toggleExtendoA);
-  Controller1.ButtonX.pressed(toggleExtendoB);
+  Controller1.ButtonY.pressed(toggleMatchloader);
+  Controller1.ButtonX.pressed(toggleLongGoal);
   Controller1.ButtonA.pressed(toggleDescorer);
-
+  bool inactive = true;
   while (true) {
   // joystick values
   // Negate Axis3 so pushing the joystick forward produces positive forward motion
@@ -124,33 +129,48 @@ void usercontrol(void) {
 
     //Intake Controls
     if (Controller1.ButtonR1.pressing()) {
+      inactive = false;
       SMechanism.spin(reverse, 100, percent);
-      Intake.spin(reverse, 100, percent);
-      Scoring.spin(reverse, 100, percent);  
+      Intake.spin(reverse, 100, percent);  
     }
     else if (Controller1.ButtonR2.pressing()) {
+      inactive = false;
       SMechanism.spin(fwd, 100, percent);
       Intake.spin(fwd, 100, percent);
       Scoring.spin(fwd, 100, percent);
-    }
+     }
+
     else {
+      inactive = true;
+    }
+
+    if(inactive){
       SMechanism.stop();
       Intake.stop();
       Scoring.stop();
     }
 
+    
+    
     if (Controller1.ButtonL1.pressing()) {
+      inactive = false;
       Flexwheel.spin(fwd, 100, percent);
+      Scoring.spin(reverse, 100, percent);
     }
+
     else if (Controller1.ButtonL2.pressing()) {
+      inactive = false;
       Flexwheel.spin(reverse, 100, percent);
     }
+   
     else {
       Flexwheel.stop();
+      inactive = true;
     }
 
     wait(20, msec);
-  }
+   }
+  
   }
 
   // end of usercontrol loop and function
@@ -165,6 +185,20 @@ int main() {
 
     // Run the rest of pre-autonomous initialization
     pre_auton();
+
+  // Print IMU heading every ~1 degree change
+  thread imuPrintThread([] {
+    double lastPrinted = IMU.heading(degrees);
+    while (true) {
+      double current = IMU.heading(degrees);
+      if (fabs(current - lastPrinted) >= 1.0) {
+        printf("IMU heading=%.1f\n", current);
+        lastPrinted = current;
+      }
+      wait(20, msec);
+    }
+  });
+
 
   // Start menu interface thread for autonomous selection
   thread interfaceThread([] {

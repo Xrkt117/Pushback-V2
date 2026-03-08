@@ -3,9 +3,7 @@
 
 using namespace vex;
 
-// Simple, self-contained team selection screen.
-// This avoids depending on any large image arrays and guarantees
-// the symbol drawTeamSelect() is defined for link-time.
+// No longer needed - team select replaced by mode picker
 void drawTeamSelect() {
     Brain.Screen.clearScreen();
 
