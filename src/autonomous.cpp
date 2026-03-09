@@ -2,8 +2,14 @@
 #include "auton-config.h"
 #include "interface.h"
 
-// Define PI here to avoid relying on platform-specific M_PI macro
 constexpr double PI = 3.14159265358979323846;
+
+// -------------------- TUNE THESE FIRST --------------------
+const double WHEEL_DIAMETER_IN = 4.25;   // your wheel diameter
+const double DRIVE_GEAR_RATIO  = 1.0;    // wheel revs per motor rev
+const double DRIVE_SIGN = 1.0;           // if forward auton goes backward, change to -1.0
+const double TURN_SIGN  = 1.0;           // if turns the wrong way, change to -1.0
+// ---------------------------------------------------------
 
 // Define auton names to display in the interface
 const char* autonNames[] = {
@@ -23,71 +29,52 @@ void outtake();
 void scoring();
 void stop();
 
-// Chassis helpers
-void chassisSetVelocity(int pct) {
-    LeftMotors.setVelocity(pct, percent);
-    RightMotors.setVelocity(pct, percent);
-}
-void chassisStop() {
-    LeftMotors.stop();
-    RightMotors.stop();
-}
-void chassisSpin(directionType dir, double leftPct, double rightPct) {
-    LeftMotors.spin(dir, leftPct, percent);
-    RightMotors.spin(dir, rightPct, percent);
-}
-
 // If true, autonomous motor directions will be inverted to match driver control
 // Set to true when autonomous movement is observed to be reversed compared to driver control
 const bool invertAuton = true;
 //Eaach autonomous routine will be varied in the future
 void autonomous(void) {
-    IMU.setHeading(0, degrees);
 
         //Auton Skills 
     if (selectedAuton == 0) {
        // picking up 3||4 balls auton (in work) ----------------------------------------------------------------------------------------
         drive(65, 55); 
-        turnTo(339, 40, false);
+        turnTo(340, 40, false);
         intake();
-        wait(100, msec);
-        drive(43.5, 15);
-        wait(250, msec);
+        drive(42.5, 20);
         stop();
         turnTo(225, 35, true);
         drive(-35, 50);
         scoring();
-        wait(500, msec);
-        stop();
-        outtake();
-        wait(500, msec);
-        stop();
-        scoring();
+        // wait(500, msec);
+        // stop();
+        // outtake();
+        // wait(500, msec);
+        // stop();
+        // scoring();
         wait(2500, msec);
         stop();
-        drive(90, 45);
-        turnTo(270, 65, true);
-        drive(25, 40);
-        turnTo(180, 65, true);
+        drive(120, 55);
+        turnTo(190, 45, true);
+        wait(100, msec);
         matchloader.set(true);
-        wait(200, msec);
-        drive(50, 70); //faster for loader & drive less distance (10cm?) for matchloader distance (subtract approximate distance of matchloader from current drive)
-        
+        wait(100, msec);
         intake();
-        wait(2000, msec);
+        drive(50, 60); //faster for loader & drive less distance (10cm?) for matchloader distance (subtract approximate distance of matchloader from current drive)
+        wait(1750, msec);
         stop();
         longGoal.set(true);
-        drive(-75, 60);
+        drive(-75, 70);
         matchloader.set(false);
         scoring();
         wait(4000, msec);
         stop();
         longGoal.set(false);
-        drive(35, 30);
-        turnTo(130, 35, true);
-        drive(-45, 45);
-        turnTo(180, 35, true);
-        drive(-180, 45);
+        drive(35, 60);
+        turnTo(130, 45, true);
+        drive(-45, 75);
+        turnTo(180, 45, true);
+        drive(-180, 85);
 
 
         //make motors stop so keep intaking without dispense blocks
@@ -129,6 +116,45 @@ void autonomous(void) {
         // wait(3000, msec);
         // drive(4, 100, true);
         // turnTo(-90, 60, true);
+    }
+
+    if(selectedAuton == 1){
+        drive(40, 45);
+        drive(40, 25);
+        drive(40, 65);
+        drive(-120, 25);
+
+    }
+
+    //match auton
+    if(selectedAuton == 2){
+        drive(82.5, 80);
+        wait(100, msec);
+        turnTo(275, 65, true);
+        matchloader.set(true);
+        intake();
+        wait(50, msec);
+        drive(25, 60);
+        wait(700, msec);
+        longGoal.set(true);
+        drive(-80, 100);
+        stop();
+        scoring();
+        wait(2350, msec);
+        stop();
+        matchloader.set(false);
+        longGoal.set(false);
+        drive(35, 60);
+        turnTo(150, 45, true);
+        intake();
+        drive(90, 75);
+        matchloader.set(true);
+        turnTo(315, 45, true);
+        stop();
+        drive(-37.5, 45);
+        scoring();
+        wait(2000, msec);
+        stop();
     }
         
         //one ball auton
@@ -389,54 +415,13 @@ void autonomous(void) {
 
 // distance = cm, speed = percent. coast = true to coast at end.
 void drive(double distanceCm, int speed) {
-    double totalDeg = (fabs(distanceCm * 0.393701) / (4.25 * PI)) * 360.0;
-    double sign = ((distanceCm >= 0) != invertAuton) ? 1.0 : -1.0;
-    int maxPct = abs(speed);
+    double revolutions = fabs(distanceCm * 0.393701) / (4.25 * PI);
+    directionType dir = ((distanceCm >= 0) != invertAuton) ? forward : reverse;
 
-    // PID constants (error normalized to 0-100%)
-    const double kP = 0.75;
-    const double kI = 0.6;
-    const double kD = 0.1;
-
-    // Heading correction
-    double startHeading = IMU.heading();
-    const double hkP = 2.0;
-
-    LeftMotors.resetPosition();
-    RightMotors.resetPosition();
-
-    double prevError = 100.0;
-    double integral = 0.0;
-
-    while (true) {
-        double traveled = (fabs(LeftMotors.position(degrees)) + fabs(RightMotors.position(degrees))) / 2.0;
-        double rawError = totalDeg - traveled;
-        if (rawError <= 0.0) break;
-
-        // normalize error to 0-100
-        double error = (rawError / totalDeg) * 100.0;
-
-        integral += error * 0.02;
-        if (integral > 100) integral = 100;
-        double derivative = (error - prevError) / 0.02;
-        prevError = error;
-
-        int pct = (int)(error * kP + integral * kI + derivative * kD);
-        if (pct < 8) pct = 8;
-        if (pct > maxPct) pct = maxPct;
-
-        double hError = startHeading - IMU.heading();
-        if (hError > 180) hError -= 360;
-        if (hError < -180) hError += 360;
-        double correction = hError * hkP;
-
-        LeftMotors.spin(fwd, (pct + correction) * sign, percent);
-        RightMotors.spin(fwd, (pct - correction) * sign, percent);
-
-        wait(20, msec);
-    }
-
-    chassisStop();
+    LeftMotors.setVelocity(abs(speed), percent);
+    RightMotors.setVelocity(abs(speed), percent);
+    LeftMotors.spinFor(dir, revolutions, rev, false);
+    RightMotors.spinFor(dir, revolutions, rev, true);
 }
 
 // Turn to an absolute heading (0-360). Automatically takes the shortest path.
@@ -462,24 +447,25 @@ void turnTo(double targetHeading, int speed, bool coast) {
 
         if (fabs(error) < 2.0) break;
 
-        // proportional: slow down near target
         int turnSpeed = (int)(fabs(error) * kP);
         if (turnSpeed < minSpeed) turnSpeed = minSpeed;
         if (turnSpeed > maxSpeed) turnSpeed = maxSpeed;
 
+        // positive error = turn right (clockwise)
+        // Try one way first. If robot turns wrong, swap fwd/reverse here.
         if (error > 0) {
-            LeftMotors.spin(fwd, turnSpeed, percent);
-            RightMotors.spin(reverse, turnSpeed, percent);
-        } else {
             LeftMotors.spin(reverse, turnSpeed, percent);
             RightMotors.spin(fwd, turnSpeed, percent);
+        } else {
+            LeftMotors.spin(fwd, turnSpeed, percent);
+            RightMotors.spin(reverse, turnSpeed, percent);
         }
 
         wait(20, msec);
     }
 
-    chassisStop();
-    IMU.setHeading(targetHeading, degrees);
+    LeftMotors.stop();
+    RightMotors.stop();
 }
 
 void intake(){

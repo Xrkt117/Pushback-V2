@@ -89,11 +89,10 @@ void pickMode() {
 /*                          Pre-Autonomous Functions                         */
 /*---------------------------------------------------------------------------*/
 void pre_auton(void) {
-  // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
-  pickMode();
+  // pickMode();
+  selectedAuton = 2;
 
-  // Calibrate IMU during setup so no delay in auton
   IMU.calibrate();
   while (IMU.isCalibrating()) {
       wait(20, msec);
