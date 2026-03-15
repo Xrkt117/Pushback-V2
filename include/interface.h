@@ -8,5 +8,6 @@ void drawAutonMenu();
 void drawSideMenu();
 void handleTouch();
 void backButton();
+void runAutonSelector();
 
 void drawMainBackground();

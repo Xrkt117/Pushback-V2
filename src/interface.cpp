@@ -9,6 +9,7 @@ using namespace vex;
 
 int currentScreen = 0;  // 0 = main, 1 = skills/match, 2 = left/right
 int selectedAuton = 0;
+bool autonSelectionComplete = false;
 
 void drawSelectedAuton() {
   Brain.Screen.setPenColor(black);
@@ -107,6 +108,7 @@ void handleTouch() {
     // Skills
     if (x > 40 && x < 230 && y > 50 && y < 190) {
       selectedAuton = 0;
+      autonSelectionComplete = true;
       currentScreen = 0;
       drawMainMenu();
     }
@@ -123,13 +125,15 @@ void handleTouch() {
   } else if (currentScreen == 2) {
     // Left
     if (x > 40 && x < 230 && y > 50 && y < 190) {
-      selectedAuton = 1;  // Match Left
+      selectedAuton = 2;  // Match Left
+      autonSelectionComplete = true;
       currentScreen = 0;
       drawMainMenu();
     }
     // Right
     if (x > 250 && x < 440 && y > 50 && y < 190) {
-      selectedAuton = 2;  // Match Right
+      selectedAuton = 1;  // Match Right
+      autonSelectionComplete = true;
       currentScreen = 0;
       drawMainMenu();
     }
@@ -138,5 +142,21 @@ void handleTouch() {
       currentScreen = 1;
       drawAutonMenu();
     }
+  }
+}
+
+void runAutonSelector() {
+  autonSelectionComplete = false;
+  currentScreen = 1;  // Start at Skills/Match prompt
+  drawAutonMenu();
+
+  while (!autonSelectionComplete) {
+    if (Brain.Screen.pressing()) {
+      handleTouch();
+      while (Brain.Screen.pressing()) {
+        wait(10, msec);
+      }
+    }
+    wait(20, msec);
   }
 }

@@ -34,47 +34,47 @@ void stop();
 const bool invertAuton = true;
 //Eaach autonomous routine will be varied in the future
 void autonomous(void) {
+    printf("Selected Auton=%.1f\n", selectedAuton);
 
         //Auton Skills 
     if (selectedAuton == 0) {
-       // picking up 3||4 balls auton (in work) ----------------------------------------------------------------------------------------
-        drive(65, 55); 
-        turnTo(340, 40, false);
-        intake();
-        drive(42.5, 20);
-        stop();
-        turnTo(225, 35, true);
-        drive(-35, 50);
-        scoring();
-        // wait(500, msec);
-        // stop();
-        // outtake();
-        // wait(500, msec);
-        // stop();
-        // scoring();
-        wait(2500, msec);
-        stop();
-        drive(120, 55);
-        turnTo(190, 45, true);
-        wait(100, msec);
+        drive(77, 80);
+        wait(50, msec);
+        turnTo(270, 50, true);
         matchloader.set(true);
-        wait(100, msec);
-        intake();
-        drive(50, 60); //faster for loader & drive less distance (10cm?) for matchloader distance (subtract approximate distance of matchloader from current drive)
-        wait(1750, msec);
+        intake(); //prepare to intake matchloader balls
+        wait(50, msec);
+
+        drive(25, 55); //drive into matchloader with force 
+        wait(1500, msec); //waits at matchloader 
         stop();
-        longGoal.set(true);
-        drive(-75, 70);
+        drive(-35, 80); //drives to mid line between matchloader and long goal
+        wait(50, msec);
+        turnTo(135, 40, true); //turns open
         matchloader.set(false);
-        scoring();
-        wait(4000, msec);
+        drive(60, 90); //drives to goal
+        turnTo(95, 35, true); //turns to face goal
+        drive(170, 90); //drives forward a bit to be in optimal scoring position
+        turnTo(175, 50, true); //turns to face goal
+        drive(-40, 50);
+        turnTo(90, 45);
+        longGoal.set(true);
+        drive(-30, 60);
+        scoring(); 
+        wait(3000, msec); //scoring at goal
+
         stop();
+        matchloader.set(true);
+        drive(75, 75); //drive into matchloader with force 
+        intake();
+        wait(1350, msec); //waits at matchloader 
+        stop();
+        drive(-71, 100); //drives to mid line between matchloader and long goal
+        scoring(); 
+        wait(2350, msec); //scoring at goal
+        stop();
+        matchloader.set(false);
         longGoal.set(false);
-        drive(35, 60);
-        turnTo(130, 45, true);
-        drive(-45, 75);
-        turnTo(180, 45, true);
-        drive(-180, 85);
 
 
         //make motors stop so keep intaking without dispense blocks
@@ -118,45 +118,91 @@ void autonomous(void) {
         // turnTo(-90, 60, true);
     }
 
-    if(selectedAuton == 1){
-        drive(40, 45);
-        drive(40, 25);
-        drive(40, 65);
-        drive(-120, 25);
+    // if(selectedAuton == 1){
+    //     drive(40, 45);
+    //     drive(40, 25);
+    //     drive(40, 65);
+    //     drive(-120, 25);
 
-    }
+    // }
 
-    //match auton
-    if(selectedAuton == 2){
-        drive(82.5, 80);
-        wait(100, msec);
-        turnTo(275, 65, true);
-        matchloader.set(true);
-        intake();
+        if(selectedAuton == 1){
+        drive(79.5, 80);
         wait(50, msec);
-        drive(25, 60);
-        wait(700, msec);
+        turnTo(90, 60, true);
+        matchloader.set(true);
+        intake(); //prepare to intake matchloader balls
+        wait(50, msec);
+
+        drive(24, 55); //drive into matchloader with force 
+        wait(300, msec); //waits at matchloader 
         longGoal.set(true);
-        drive(-80, 100);
+        drive(-71, 100); //drives to goal
         stop();
-        scoring();
-        wait(2350, msec);
+        scoring(); 
+        wait(2350, msec); //scoring at goal
         stop();
         matchloader.set(false);
         longGoal.set(false);
-        drive(35, 60);
-        turnTo(150, 45, true);
+
+        drive(15, 70);  //drives forward towards mid of matchloader & high goal (about to turn)
+        turnTo(213, 45, true); //angle towards approaching mid goal
         intake();
-        drive(90, 75);
-        matchloader.set(true);
-        turnTo(315, 45, true);
+        drive(100, 40); //drives towards blocks
         stop();
-        drive(-37.5, 45);
-        scoring();
-        wait(2000, msec);
+        turnTo(230, 35, true); //angles towards mid goal
+        outtake();
+        wait(3000, msec);
         stop();
     }
-        
+
+    //left match auton
+    if(selectedAuton == 2){
+        drive(78, 90);
+        wait(50, msec);
+        turnTo(270, 50, true);
+        matchloader.set(true);
+        intake(); //prepare to intake matchloader balls
+        wait(50, msec);
+
+        drive(24, 60); //drive into matchloader with force 
+        wait(300, msec); //waits at matchloader 
+        longGoal.set(true);
+        drive(-71, 100); //drives to goal
+        stop();
+        scoring(); 
+        wait(2350, msec); //scoring at goal
+        stop();
+        matchloader.set(false);
+        longGoal.set(false);
+
+        drive(15, 70);  //drives forward towards mid of matchloader & high goal (about to turn)
+        turnTo(150, 45, true); //angle towards approaching mid goal
+        intake();
+        drive(75, 40); //drives towards blocks
+        matchloader.set(true); //keep intaking to hold onto blocks and prevent dispense
+        stop();
+        turnTo(310, 35, true); //angles towards mid goal
+        drive(-27.5, 45); //drives up to goal
+        // outtake();
+        // wait(300, msec);
+        matchloader.set(false);
+        scoring();
+        wait(3000, msec);
+        stop();
+        drive(-5, 45);
+         turnTo(270, 45, true); //turn to next matchloaders on right
+        //String x = "I am become psuedo op";
+    }
+
+    if (selectedAuton == 3) {
+        drive(8, 30);
+    }
+     
+        if (selectedAuton == 4) {
+
+    }
+
         //one ball auton
         // drive(-32, 70);
         // turnTo(32, 70);
@@ -415,13 +461,35 @@ void autonomous(void) {
 
 // distance = cm, speed = percent. coast = true to coast at end.
 void drive(double distanceCm, int speed) {
-    double revolutions = fabs(distanceCm * 0.393701) / (4.25 * PI);
-    directionType dir = ((distanceCm >= 0) != invertAuton) ? forward : reverse;
+    const double kP = 0.4;
+    const double settleErrorDeg = 3.0;
 
-    LeftMotors.setVelocity(abs(speed), percent);
-    RightMotors.setVelocity(abs(speed), percent);
-    LeftMotors.spinFor(dir, revolutions, rev, false);
-    RightMotors.spinFor(dir, revolutions, rev, true);
+    double targetDegrees = (distanceCm * 0.393701) / (4.25 * PI) * 360.0;
+    if (invertAuton) targetDegrees = -targetDegrees;
+
+    LeftMotors.resetPosition();
+    RightMotors.resetPosition();
+    LeftMotors.setStopping(brakeType::brake);
+    RightMotors.setStopping(brakeType::brake);
+
+    while (true) {
+        double currentDegrees = (LeftMotors.position(deg) + RightMotors.position(deg)) / 2.0;
+        double error = targetDegrees - currentDegrees;
+
+        if (fabs(error) < settleErrorDeg) break;
+
+        double output = error * kP;
+        if (output > abs(speed)) output = abs(speed);
+        if (output < -abs(speed)) output = -abs(speed);
+
+        LeftMotors.spin(fwd, output, percent);
+        RightMotors.spin(fwd, output, percent);
+
+        wait(20, msec);
+    }
+
+    LeftMotors.stop();
+    RightMotors.stop();
 }
 
 // Turn to an absolute heading (0-360). Automatically takes the shortest path.
@@ -431,9 +499,8 @@ void turnTo(double targetHeading, int speed, bool coast) {
     while (targetHeading >= 360.0) targetHeading -= 360.0;
     while (targetHeading < 0.0) targetHeading += 360.0;
 
-    int maxSpeed = abs(speed);
-    const double kP = 0.8;
-    const int minSpeed = 8;
+    const double kP = 0.9;
+    const double maxSpeed = abs(speed);
 
     LeftMotors.setStopping(coast ? brakeType::coast : brakeType::brake);
     RightMotors.setStopping(coast ? brakeType::coast : brakeType::brake);
@@ -445,23 +512,21 @@ void turnTo(double targetHeading, int speed, bool coast) {
         if (error > 180) error -= 360;
         if (error < -180) error += 360;
 
-        if (fabs(error) < 2.0) break;
+        if (fabs(error) < 3.0) break;
 
-        int turnSpeed = (int)(fabs(error) * kP);
-        if (turnSpeed < minSpeed) turnSpeed = minSpeed;
+        double turnSpeed = error * kP;
         if (turnSpeed > maxSpeed) turnSpeed = maxSpeed;
+        if (turnSpeed < -maxSpeed) turnSpeed = -maxSpeed;
 
-        // positive error = turn right (clockwise)
-        // Try one way first. If robot turns wrong, swap fwd/reverse here.
-        if (error > 0) {
+        if (turnSpeed > 0) {
             LeftMotors.spin(reverse, turnSpeed, percent);
             RightMotors.spin(fwd, turnSpeed, percent);
         } else {
-            LeftMotors.spin(fwd, turnSpeed, percent);
-            RightMotors.spin(reverse, turnSpeed, percent);
+            LeftMotors.spin(fwd, -turnSpeed, percent);
+            RightMotors.spin(reverse, -turnSpeed, percent);
         }
 
-        wait(20, msec);
+        wait(10, msec);
     }
 
     LeftMotors.stop();

@@ -90,13 +90,8 @@ void pickMode() {
 /*---------------------------------------------------------------------------*/
 void pre_auton(void) {
   vexcodeInit();
-  // pickMode();
-  selectedAuton = 2;
-
-  IMU.calibrate();
-  while (IMU.isCalibrating()) {
-      wait(20, msec);
-  }
+  // runAutonSelector();
+  selectedAuton = 0;
 }
 
 /*---------------------------------------------------------------------------*/
